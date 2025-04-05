@@ -10,32 +10,22 @@ import (
 	"github.com/khsnnn/diploma_fitness_server/club-service/internal/models"
 )
 
-func TestGetClubs(t *testing.T) {
-	app := fiber.New()
+func TestGetClubsWithDistanceAndClusters(t *testing.T) {
+    app := fiber.New()
+    app.Get("/api/clubs", GetClubs)
 
-	app.Get("/clubs", GetClubs)
+    req := httptest.NewRequest(http.MethodGet, "/api/clubs?distance=5&clusters=Танцевальные%20направления&lat=57.152&lng=65.534", nil)
+    resp, err := app.Test(req)
+    if err != nil {
+        t.Fatalf("Failed to perform request: %v", err)
+    }
 
-	req := httptest.NewRequest(http.MethodGet, "/clubs", nil)
-	resp, err := app.Test(req)
-	if err != nil {
-		t.Fatalf("Failed to perform request: %v", err)
-	}
+    if resp.StatusCode != http.StatusOK {
+        t.Errorf("Expected status 200 OK, got %d", resp.StatusCode)
+    }
 
-	if resp.StatusCode != http.StatusOK {
-		t.Errorf("Expected status code %d, got %d", http.StatusOK, resp.StatusCode)
-	}
-
-	contentType := resp.Header.Get("Content-Type")
-	if contentType != "application/json" {
-		t.Errorf("Expected Content-Type 'application/json', got '%s'", contentType)
-	}
-
-	var clubs []models.Club
-	if err := json.NewDecoder(resp.Body).Decode(&clubs); err != nil {
-		t.Fatalf("Failed to decode responce: %v", err)
-	}
-
-	if len(clubs) != 0 {
-		t.Errorf("Expected empty array, got %d clubs", len(clubs))
-	}
+    var clubs []models.Club
+    if err := json.NewDecoder(resp.Body).Decode(&clubs); err != nil {
+        t.Fatalf("Failed to decode response: %v", err)
+    }
 }

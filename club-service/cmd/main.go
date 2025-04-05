@@ -5,8 +5,8 @@ import (
 	"github.com/khsnnn/diploma_fitness_server/club-service/internal/api"
 )
 
-func main(){
+func main() {
 	app := fiber.New()
-	app.Get("/clubs", api.GetClubs)
-	app.Listen(":8000")
+	app.Get("/api/clubs", api.GetClubs)
+	app.Listen(":8003")
 }
