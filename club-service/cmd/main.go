@@ -1,37 +1,29 @@
 package main
 
 import (
-	"fmt"
-	"log"
-	"os"
-
 	"github.com/gofiber/fiber/v2"
-	"github.com/joho/godotenv"
 	"github.com/khsnnn/diploma_fitness_server/club-service/internal/api"
-	"github.com/khsnnn/diploma_fitness_server/club-service/internal/repository"
+	"github.com/khsnnn/diploma_fitness_server/club-service/internal/db"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
 )
 
 func main() {
-	if err := godotenv.Load(); err != nil { 
-		log.Fatalf("Failed to load .env file: %v", err)
+	dsn := "host=localhost user=postgres password=your_password dbname=fitness_db port=5432 sslmode=disable"
+	gormDB, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	if err != nil {
+		panic("failed to connect database: " + err.Error())
 	}
 
-	db, err := repository.NewDB()
-	if err != nil {
-		log.Fatalf("Failed to connect to database: %v", err)
-	}
-	api.DB = db
+	dbInstance := db.NewDB(gormDB)
+
+	handler := api.NewHandler(dbInstance)
 
 	app := fiber.New()
-	app.Get("/api/clubs", api.GetClubs)
 
-	port := os.Getenv("APP_PORT")
-	if port == "" {
-		port = "8080" 
-	}
+	app.Get("/clubs", handler.GetClubs)
 
-	log.Printf("Server starting on port %s", port)
-	if err := app.Listen(fmt.Sprintf(":%s", port)); err != nil {
-		log.Fatalf("Failed to start server: %v", err)
+	if err := app.Listen(":8080"); err != nil {
+		panic("failed to start server: " + err.Error())
 	}
 }

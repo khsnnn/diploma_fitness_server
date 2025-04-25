@@ -11,40 +11,34 @@ import (
 )
 
 func main() {
-	// Инициализация логгера
 	logger, err := zap.NewProduction()
 	if err != nil {
 		log.Fatalf("Failed to initialize logger: %v", err)
 	}
 	defer logger.Sync()
 
-	// Загрузка переменных окружения
 	if err := godotenv.Load(); err != nil {
 		logger.Warn("No .env file found")
 	}
 
-	// Получение конфигурации базы данных
 	dbConfig := struct {
 		host, port, user, password, dbname string
 	}{
-		host:     os.Getenv("POSTGRES_HOST"),
-		port:     os.Getenv("POSTGRES_PORT"),
-		user:     os.Getenv("POSTGRES_USER"),
-		password: os.Getenv("POSTGRES_PASSWORD"),
-		dbname:   os.Getenv("POSTGRES_DB"),
+		host:     os.Getenv("DB_HOST"),
+		port:     os.Getenv("DB_PORT"),
+		user:     os.Getenv("DB_USER"),
+		password: os.Getenv("DB_PASSWORD"),
+		dbname:   os.Getenv("DB_NAME"),
 	}
 
-	// Подключение к базе данных
 	db, err := db.NewDB(dbConfig.host, dbConfig.port, dbConfig.user, dbConfig.password, dbConfig.dbname, logger)
 	if err != nil {
 		logger.Fatal("Failed to connect to database", zap.Error(err))
 	}
 	defer db.Close()
 
-	// Инициализация сервиса
 	svc := service.NewService(db, logger)
 
-	// Обновление данных
 	dataDir := "./data"
 	if err := svc.UpdateClubs(dataDir); err != nil {
 		logger.Fatal("Failed to update clubs", zap.Error(err))

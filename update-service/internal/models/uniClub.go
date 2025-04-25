@@ -16,13 +16,14 @@ type Schedule struct {
 }
 
 type UniClub struct {
-	ID          int                 `json:"id"`
-	Name        string              `json:"name"`
-	Address     string              `json:"address"`
-	Description string              `json:"description"`
-	WorkingHours string             `json:"working_hours"`
-	Categories  map[string][]string `json:"categories"`
-	Schedule    Schedule            `json:"schedule"`
-	Coordinates Coordinates         `json:"coordinates"`
-	Status      string              `json:"status"`
+    ID           int                 `json:"id"`
+    Name         string              `json:"name"`
+    Address      string              `json:"address"`
+    Description  string              `json:"description"`
+    WorkingHours string              `json:"working_hours"`
+    Categories   map[string][]string `json:"categories"`
+    Schedule     Schedule            `json:"schedule"`
+    Lat          string              `json:"lat"` // Новое поле для широты
+    Lon          string              `json:"lon"` // Новое поле для долготы
+    Status       string              `json:"status"`
 }

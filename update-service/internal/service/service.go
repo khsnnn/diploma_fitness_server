@@ -33,8 +33,21 @@ func (s *Service) UpdateClubs(dataDir string) error {
 		s.logger.Error("Failed to unmarshal commercial clubs", zap.Error(err))
 		return err
 	}
-
+	s.logger.Info("Read commercial clubs", zap.Int("count", len(commercialClubs)))
 	for _, club := range commercialClubs {
+		s.logger.Info("Processing commercial club",
+			zap.String("name", club.Name),
+			zap.Any("categories", club.Categories))
+		if club.Categories == nil {
+			s.logger.Warn("Categories is nil for commercial club", zap.String("name", club.Name))
+			club.Categories = make(map[string][]string) // Инициализируем пустой словарь
+		} else if len(club.Categories) == 0 {
+			s.logger.Info("Categories is empty for commercial club", zap.String("name", club.Name))
+		} else {
+			s.logger.Info("Categories found for commercial club",
+				zap.String("name", club.Name),
+				zap.Int("category_count", len(club.Categories)))
+		}
 		if err := s.db.InsertCommercialClub(club); err != nil {
 			s.logger.Error("Failed to insert commercial club", zap.String("name", club.Name), zap.Error(err))
 			continue
@@ -54,8 +67,21 @@ func (s *Service) UpdateClubs(dataDir string) error {
 		s.logger.Error("Failed to unmarshal university clubs", zap.Error(err))
 		return err
 	}
-
+	s.logger.Info("Read university clubs", zap.Int("count", len(universityClubs)))
 	for _, club := range universityClubs {
+		s.logger.Info("Processing university club",
+			zap.String("name", club.Name),
+			zap.Any("categories", club.Categories))
+		if club.Categories == nil {
+			s.logger.Warn("Categories is nil for university club", zap.String("name", club.Name))
+			club.Categories = make(map[string][]string) // Инициализируем пустой словарь
+		} else if len(club.Categories) == 0 {
+			s.logger.Info("Categories is empty for university club", zap.String("name", club.Name))
+		} else {
+			s.logger.Info("Categories found for university club",
+				zap.String("name", club.Name),
+				zap.Int("category_count", len(club.Categories)))
+		}
 		if err := s.db.InsertUniversityClub(club); err != nil {
 			s.logger.Error("Failed to insert university club", zap.String("name", club.Name), zap.Error(err))
 			continue
