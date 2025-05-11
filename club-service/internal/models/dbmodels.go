@@ -1,4 +1,6 @@
 package models
+
+
 // Модели для работы с базой данных (GORM)
 type DBClub struct {
     ID           int            `json:"id" gorm:"primaryKey"`
@@ -15,16 +17,28 @@ type DBClub struct {
     Schedules    []DBSchedule   `json:"schedule" gorm:"foreignKey:ClubID"`
 }
 
+func (DBClub) TableName() string {
+    return "clubs"
+}
+
 type DBCategory struct {
     ID           int            `json:"-" gorm:"primaryKey"`
     Name         string         `json:"name"`
     Subcategories []DBSubcategory `json:"subcategories" gorm:"foreignKey:CategoryID"`
 }
 
+func (DBCategory) TableName() string {
+    return "categories"
+}
+
 type DBSubcategory struct {
     ID         int    `json:"-" gorm:"primaryKey"`
     CategoryID int    `json:"-"`
     Name       string `json:"name"`
+}
+
+func (DBSubcategory) TableName() string {
+    return "subcategories"
 }
 
 type DBSchedule struct {
@@ -34,6 +48,10 @@ type DBSchedule struct {
     Time       string `json:"time"`
     Activity   string `json:"activity"`
     Instructor string `json:"instructor"`
+}
+
+func (DBSchedule) TableName() string {
+    return "schedules"
 }
 
 // Структура для ответа API

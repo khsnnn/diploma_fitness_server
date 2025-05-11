@@ -34,21 +34,21 @@ func (d *DB) GetClubs(filter ClubFilter) ([]models.APIClub, error) {
 	}
 
 	if filter.MinRating != nil {
-		query = query.Where("rating >= ?", *filter.MinRating)
+		query = query.Where("COALESCE(rating, 0) >= ?", *filter.MinRating)
 	}
 
 	if len(filter.Categories) > 0 {
 		query = query.Joins("JOIN club_categories cc ON clubs.id = cc.club_id").
 			Joins("JOIN categories c ON cc.category_id = c.id").
 			Where("c.name IN ?", filter.Categories).
-			Group("clubs.id")
+			Distinct("clubs.id")
 	}
 
 	if len(filter.Subcategories) > 0 {
 		query = query.Joins("JOIN club_subcategories cs ON clubs.id = cs.club_id").
 			Joins("JOIN subcategories s ON cs.subcategory_id = s.id").
 			Where("s.name IN ?", filter.Subcategories).
-			Group("clubs.id")
+			Distinct("clubs.id")
 	}
 
 	var dbClubs []models.DBClub
@@ -98,4 +98,44 @@ func (d *DB) GetClubs(filter ClubFilter) ([]models.APIClub, error) {
 	}
 
 	return apiClubs, nil
+}
+
+func (d *DB) GetClub(id int) (*models.APIClub, error) {
+	var dbClub models.DBClub
+	if err := d.db.Model(&models.DBClub{}).
+		Preload("Categories.Subcategories").
+		Preload("Schedules").
+		Where("id = ?", id).
+		First(&dbClub).Error; err != nil {
+		return nil, err
+	}
+
+	apiCategories := make([]models.APICategory, 0, len(dbClub.Categories))
+	for _, cat := range dbClub.Categories {
+		subcatNames := make([]string, 0, len(cat.Subcategories))
+		for _, subcat := range cat.Subcategories {
+			subcatNames = append(subcatNames, subcat.Name)
+		}
+		apiCategories = append(apiCategories, models.APICategory{
+			Name:          cat.Name,
+			Subcategories: subcatNames,
+		})
+	}
+
+	apiClub := &models.APIClub{
+		ID:           dbClub.ID,
+		Name:         dbClub.Name,
+		Address:      dbClub.Address,
+		Description:  dbClub.Description,
+		WorkingHours: dbClub.WorkingHours,
+		Rating:       dbClub.Rating,
+		Lat:          dbClub.Lat,
+		Lon:          dbClub.Lon,
+		Type:         dbClub.Type,
+		Status:       dbClub.Status,
+		Categories:   apiCategories,
+		Schedules:    dbClub.Schedules,
+	}
+
+	return apiClub, nil
 }

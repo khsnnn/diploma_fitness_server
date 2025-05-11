@@ -6,9 +6,9 @@ type Club struct {
 	Address      string              `json:"address"`
 	Description  string              `json:"description"`
 	WorkingHours string              `json:"working_hours"`
-	Rating       string              `json:"rating"` // String in JSON, will be normalized to float
+	Rating       string              `json:"rating"` 
 	Categories   map[string][]string `json:"categories"`
-	Lat          string              `json:"lat"` // Новое поле для широты
-	Lon          string              `json:"lon"` // Новое поле для долготы
+	Lat          string              `json:"lat"` 
+	Lon          string              `json:"lon"` 
 	Status       string              `json:"status"`
 }
